@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-// import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamable-http.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "./server.js";
 import { logger } from "./utils/logger.js";
 import dotenv from "dotenv";
@@ -36,9 +36,33 @@ async function main() {
       const port = parseInt(process.env.MCP_PORT || "3000", 10);
       logger.info(`Starting Europarcel MCP server with HTTP transport on port ${port}`);
       
-      // HTTP transport implementation would go here
-      // This is a placeholder for future HTTP support
-      throw new Error("HTTP transport not yet implemented");
+      // Create Express app for HTTP transport
+      const express = await import('express');
+      const app = express.default();
+      
+      app.use(express.default.json());
+      
+      // Simple stateless MCP endpoint at root - each request is independent  
+      app.post('/', async (req, res) => {
+        try {
+          // Create fresh transport for each request - truly stateless
+          const transport = new StreamableHTTPServerTransport({
+            sessionIdGenerator: undefined, // Disable session management completely
+          });
+          
+          await server.connect(transport);
+          await transport.handleRequest(req, res, req.body);
+        } catch (error) {
+          logger.error('MCP request error:', error);
+          res.status(500).json({ error: 'Internal server error' });
+        }
+      });
+      
+      // Start Express server
+      app.listen(port, () => {
+        logger.info(`Europarcel MCP server listening on port ${port}`);
+        logger.info(`MCP endpoint available at http://localhost:${port}/`);
+      });
     } else {
       throw new Error(`Unknown transport type: ${transportType}`);
     }

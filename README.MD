@@ -1,20 +1,38 @@
-# Europarcel MCP Server
+# Europarcel MCP Server (Hosted)
 
-A Model Context Protocol (MCP) server for the Europarcel Public API, providing AI assistants with tools to interact with shipping and logistics services. Self-hostable via Docker or npm.
+A Model Context Protocol (MCP) server for the Europarcel Public API, providing AI assistants with tools to interact with shipping and logistics services. This hosted version supports both stdio and HTTP transport modes, making it deployable as a web service.
 
 ## Features
 
 - 🚚 **Comprehensive Shipping Tools** - 25 tools covering account, addresses, locations, orders, tracking, and pricing
 - 🔐 **Secure API Integration** - Uses your own Europarcel API key
-- 🐳 **Docker Support** - Easy deployment with Docker
-- 📦 **npm Package** - Simple installation via npm/npx
+- 🌐 **HTTP Server Mode** - Run as web service with RESTful MCP endpoint
+- 📡 **Dual Transport** - Supports both stdio (CLI) and HTTP (web) transport modes
+- ⚡ **Stateless Design** - Each request is independent, perfect for AI assistants
+- 🛠️ **Local Development** - Clone, build, and run locally
 - 🤖 **AI Assistant Ready** - Works with Claude Desktop and other MCP-compatible clients
 
 ## Quick Start
 
-### Claude Desktop Configuration (Simplest - Copy & Paste)
+### Local Development Only
 
-Add to your Claude Desktop config file:
+```bash
+# Clone and setup locally
+git clone <your-repo-url>
+cd EUROPARCEL-MCP-HOSTED
+npm install
+npm run build
+
+# Run stdio mode (for Claude Desktop)
+EUROPARCEL_API_KEY=your-api-key-here npm start
+
+# Run HTTP server mode (for web integration)
+EUROPARCEL_API_KEY=your-api-key-here MCP_TRANSPORT=http MCP_PORT=3001 npm start
+```
+
+### Local Claude Desktop Setup
+
+Add to your Claude Desktop config:
 
 **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
@@ -22,9 +40,9 @@ Add to your Claude Desktop config file:
 ```json
 {
   "mcpServers": {
-    "europarcel": {
-      "command": "npx",
-      "args": ["@europarcel/mcp"],
+    "europarcel-local": {
+      "command": "node",
+      "args": ["/absolute/path/to/EUROPARCEL-MCP-HOSTED/dist/index.js"],
       "env": {
         "EUROPARCEL_API_KEY": "your-api-key-here"
       }
@@ -33,71 +51,58 @@ Add to your Claude Desktop config file:
 }
 ```
 
-### Using npm (Recommended)
-
-```bash
-# Install globally
-npm install -g @europarcel/mcp
-
-# Set your API key
-export EUROPARCEL_API_KEY=your-api-key-here
-
-# Run the server
-europarcel-mcp
-```
-
-### Using npx (No Installation)
-
-```bash
-# Run directly
-EUROPARCEL_API_KEY=your-api-key npx @europarcel/mcp
-```
-
-### Using Docker
-
-```bash
-# Pull the image
-docker pull europarcel/mcp
-
-# Create a .env file with your API key
-echo "EUROPARCEL_API_KEY=your-api-key-here" > .env
-
-# Run with environment file
-docker run -it --env-file .env europarcel/mcp
-
-# Or run with inline environment variable
-docker run -it -e EUROPARCEL_API_KEY=your-api-key europarcel/mcp
-```
-
-**Alternative: Using Docker Compose**
-
-Create a `docker-compose.yml` file:
-```yaml
-version: '3.8'
-services:
-  europarcel-mcp:
-    image: europarcel/mcp:latest
-    env_file: .env
-    stdin_open: true
-    tty: true
-```
-
-Then run:
-```bash
-# Create .env file (same as above)
-echo "EUROPARCEL_API_KEY=your-api-key-here" > .env
-
-# Run with docker-compose
-docker-compose up
-```
-
 ## Configuration
 
-### Environment Variables
+Only set your API key - everything else has sensible defaults:
 
-- `EUROPARCEL_API_KEY` (required) - Your Europarcel API key
-- `LOG_LEVEL` (optional) - Logging level: error, warn, info, debug (default: info)
-- `MCP_TRANSPORT` (optional) - Transport type: stdio, http (default: stdio)
+```bash
+export EUROPARCEL_API_KEY=your-api-key-here
+```
+
+**Optional environment variables:**
+- `MCP_TRANSPORT=http` - Enable HTTP server mode (default: stdio)
+- `MCP_PORT=3001` - HTTP server port (default: 3000)  
+- `LOG_LEVEL=debug` - Logging level (default: info)
+
+### HTTP Endpoint Usage
+
+When running in HTTP mode, the server exposes a RESTful MCP endpoint at the root `/` that accepts POST requests:
+
+```bash
+# Simple stateless requests - no session management needed
+curl -X POST http://localhost:3001/ \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list",
+    "params": {}
+  }'
+
+# Call any tool directly
+curl -X POST http://localhost:3001/ \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "getProfile",
+      "arguments": {}
+    }
+  }'
+```
+
+**Stateless Design:**
+- Each request is completely independent
+- No sessions, no state management
+- Claude/n8n handles conversation context
+- Perfect for AI assistants and automation tools
+
+**Integration with Web Applications:**
+The HTTP mode makes it easy to integrate with web applications, allowing you to build custom interfaces on top of the Europarcel API tools.
 
 ## Available Tools
 
@@ -265,18 +270,15 @@ After configuration, you can ask Claude:
 ### Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/europarcel/mcp.git
-cd mcp
-
-# Install dependencies
+# Setup the local project
 npm install
-
-# Build the project
 npm run build
 
-# Run in development mode
+# Development mode (stdio)
 npm run dev
+
+# Development mode (HTTP)
+npm run dev:http
 ```
 
 ### Testing
@@ -285,8 +287,15 @@ npm run dev
 # Run tests
 npm test
 
-# Test with MCP Inspector
-EUROPARCEL_API_KEY=your-key npx @modelcontextprotocol/inspector dist/index.js
+# Test with MCP Inspector (stdio mode)  
+EUROPARCEL_API_KEY=your-key npx @modelcontextprotocol/inspector node dist/index.js
+
+# Test HTTP mode with curl
+EUROPARCEL_API_KEY=your-key MCP_TRANSPORT=http MCP_PORT=3001 npm start &
+curl -X POST http://localhost:3001/ \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}}'
 ```
 
 ## API Documentation
@@ -299,7 +308,7 @@ For detailed API documentation, visit:
 
 - 📧 Email: cs@europarcel.com
 - 📚 Documentation: https://www.eawb.ro/docs
-- 🐛 Issues: https://github.com/europarcel/mcp/issues
+- 🐛 Issues: Create an issue in your project repository
 
 ## License
 
