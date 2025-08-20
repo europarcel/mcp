@@ -1,12 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { EuroparcelApiClient } from "../../api/client.js";
 import { logger } from "../../utils/logger.js";
+import { apiKeyStorage } from "../../index.js";
 import { z } from "zod";
 
 export function registerTrackOrdersByIdsTool(server: McpServer): void {
   // Create API client instance
-  const apiKey = process.env.EUROPARCEL_API_KEY!;
-  const client = new EuroparcelApiClient(apiKey);
+  
   
   // Register trackOrdersByIds tool
   server.registerTool(
@@ -24,6 +24,23 @@ export function registerTrackOrdersByIdsTool(server: McpServer): void {
       }
     },
     async (args: any) => {
+      // Get API key from async context
+      const apiKey = apiKeyStorage.getStore();
+      
+      if (!apiKey) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "Error: X-API-KEY header is required"
+            }
+          ]
+        };
+      }
+      
+      // Create API client with customer's API key
+      const client = new EuroparcelApiClient(apiKey);
+      
       try {
         if (args.order_ids === undefined || args.order_ids === null) {
           return {

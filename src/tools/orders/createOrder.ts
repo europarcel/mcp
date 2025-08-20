@@ -1,12 +1,12 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { EuroparcelApiClient } from "../../api/client.js";
 import { logger } from "../../utils/logger.js";
+import { apiKeyStorage } from "../../index.js";
 import { z } from "zod";
 
 export function registerCreateOrderTool(server: McpServer): void {
   // Create API client instance
-  const apiKey = process.env.EUROPARCEL_API_KEY!;
-  const client = new EuroparcelApiClient(apiKey);
+  
 
   // Define Zod schema for order creation - similar to pricing but with stricter requirements
   const CreateOrderSchema = {
@@ -88,6 +88,23 @@ export function registerCreateOrderTool(server: McpServer): void {
       inputSchema: CreateOrderSchema
     },
     async (args: any) => {
+      // Get API key from async context
+      const apiKey = apiKeyStorage.getStore();
+      
+      if (!apiKey) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "Error: X-API-KEY header is required"
+            }
+          ]
+        };
+      }
+      
+      // Create API client with customer's API key
+      const client = new EuroparcelApiClient(apiKey);
+      
       try {
         logger.info("Creating new order", { 
           carrier_id: args.carrier_id, 

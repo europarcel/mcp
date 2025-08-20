@@ -1,11 +1,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { EuroparcelApiClient } from "../../api/client.js";
 import { logger } from "../../utils/logger.js";
+import { apiKeyStorage } from "../../index.js";
 
 export function registerGetCountriesTool(server: McpServer): void {
   // Create API client instance
-  const apiKey = process.env.EUROPARCEL_API_KEY!;
-  const client = new EuroparcelApiClient(apiKey);
+  
   
   // Register getCountries tool
   server.registerTool(
@@ -16,6 +16,23 @@ export function registerGetCountriesTool(server: McpServer): void {
       inputSchema: {}
     },
     async () => {
+      // Get API key from async context
+      const apiKey = apiKeyStorage.getStore();
+      
+      if (!apiKey) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "Error: X-API-KEY header is required"
+            }
+          ]
+        };
+      }
+      
+      // Create API client with customer's API key
+      const client = new EuroparcelApiClient(apiKey);
+      
       try {
         logger.info("Fetching countries");
         
