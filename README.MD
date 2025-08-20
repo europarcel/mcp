@@ -69,7 +69,7 @@ export EUROPARCEL_API_KEY=your-api-key-here
 When running in HTTP mode, the server exposes a RESTful MCP endpoint at the root `/` that accepts POST requests:
 
 ```bash
-# Simple stateless requests - no session management needed
+# List available tools (no auth needed)
 curl -X POST http://localhost:3001/ \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
@@ -80,10 +80,11 @@ curl -X POST http://localhost:3001/ \
     "params": {}
   }'
 
-# Call any tool directly
+# Call tools with customer API key
 curl -X POST http://localhost:3001/ \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
+  -H "X-API-KEY: customer-europarcel-api-key" \
   -d '{
     "jsonrpc": "2.0",
     "id": 2,
@@ -95,11 +96,11 @@ curl -X POST http://localhost:3001/ \
   }'
 ```
 
-**Stateless Design:**
-- Each request is completely independent
-- No sessions, no state management
-- Claude/n8n handles conversation context
-- Perfect for AI assistants and automation tools
+**Multi-Tenant Design:**
+- Each request is completely independent and stateless
+- API keys provided via `X-API-KEY` header per request
+- No hardcoded credentials - each customer uses their own API key
+- Perfect for n8n workflows and multi-customer deployments
 
 **Integration with Web Applications:**
 The HTTP mode makes it easy to integrate with web applications, allowing you to build custom interfaces on top of the Europarcel API tools.

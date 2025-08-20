@@ -5,17 +5,24 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { createServer } from "./server.js";
 import { logger } from "./utils/logger.js";
 import dotenv from "dotenv";
+import { AsyncLocalStorage } from "async_hooks";
+
+// Context storage for API keys
+export const apiKeyStorage = new AsyncLocalStorage<string>();
+
+// Extend Express Request to include API key
+declare global {
+  namespace Express {
+    interface Request {
+      europarcelApiKey?: string;
+    }
+  }
+}
 
 // Load environment variables
 dotenv.config();
 
-// Validate required environment variables
-if (!process.env.EUROPARCEL_API_KEY) {
-  logger.error("EUROPARCEL_API_KEY environment variable is required");
-  console.error("Error: EUROPARCEL_API_KEY environment variable is required");
-  console.error("Please set it using: export EUROPARCEL_API_KEY=your-api-key");
-  process.exit(1);
-}
+// No API key validation - customers provide their own keys via n8n
 
 async function main() {
   try {
@@ -33,7 +40,7 @@ async function main() {
       logger.info("Europarcel MCP server connected via stdio");
     } else if (transportType === "http") {
       // Use HTTP transport (for web-based clients)
-      const port = parseInt(process.env.MCP_PORT || "3000", 10);
+      const port = parseInt(process.env.PORT || process.env.MCP_PORT || "8080", 10);
       logger.info(`Starting Europarcel MCP server with HTTP transport on port ${port}`);
       
       // Create Express app for HTTP transport
@@ -45,13 +52,27 @@ async function main() {
       // Simple stateless MCP endpoint at root - each request is independent  
       app.post('/', async (req, res) => {
         try {
-          // Create fresh transport for each request - truly stateless
-          const transport = new StreamableHTTPServerTransport({
-            sessionIdGenerator: undefined, // Disable session management completely
-          });
+          // Extract API key from header
+          const apiKey = req.headers['x-api-key'] as string;
           
-          await server.connect(transport);
-          await transport.handleRequest(req, res, req.body);
+          if (!apiKey) {
+            res.status(401).json({ 
+              error: 'Authentication required',
+              message: 'X-API-KEY header is required'
+            });
+            return;
+          }
+          
+          // Store API key in async context for tools to access
+          await apiKeyStorage.run(apiKey, async () => {
+            // Create fresh transport for each request - truly stateless
+            const transport = new StreamableHTTPServerTransport({
+              sessionIdGenerator: undefined, // Disable session management completely
+            });
+            
+            await server.connect(transport);
+            await transport.handleRequest(req, res, req.body);
+          });
         } catch (error) {
           logger.error('MCP request error:', error);
           res.status(500).json({ error: 'Internal server error' });
