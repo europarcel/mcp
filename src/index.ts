@@ -49,6 +49,12 @@ async function main() {
       
       app.use(express.default.json());
       
+      // Redirect GET requests (direct browser access) to europarcel.com
+      app.get('/', (_, res) => {
+        logger.info('Redirecting browser request to europarcel.com');
+        res.redirect(301, 'https://europarcel.com');
+      });
+      
       // Simple stateless MCP endpoint at root - each request is independent  
       app.post('/', async (req, res) => {
         try {
