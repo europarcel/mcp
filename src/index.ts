@@ -45,9 +45,31 @@ async function main() {
       
       // Create Express app for HTTP transport
       const express = await import('express');
+      const { rateLimit } = await import('express-rate-limit');
       const app = express.default();
       
       app.use(express.default.json());
+      
+      // Rate limiting: 400 requests per API key per minute
+      const apiKeyRateLimit = rateLimit({
+        windowMs: 60 * 1000, // 1 minute
+        max: 400, // 400 requests per window per API key
+        keyGenerator: (req) => {
+          // Use API key as the unique identifier for rate limiting
+          const apiKey = req.headers['x-api-key'] as string;
+          return apiKey || req.ip || 'unknown'; // Always return a string
+        },
+        message: {
+          error: 'Rate limit exceeded',
+          message: 'Maximum 400 requests per minute per API key allowed'
+        },
+        standardHeaders: true, // Return rate limit info in headers
+        legacyHeaders: false, // Disable legacy X-RateLimit-* headers
+        skip: (req) => {
+          // Skip rate limiting for GET requests (redirects)
+          return req.method === 'GET';
+        }
+      });
       
       // Redirect GET requests (direct browser access) to europarcel.com
       app.get('/', (_, res) => {
@@ -56,7 +78,7 @@ async function main() {
       });
       
       // Simple stateless MCP endpoint at root - each request is independent  
-      app.post('/', async (req, res) => {
+      app.post('/', apiKeyRateLimit, async (req, res) => {
         try {
           // Extract API key from header
           const apiKey = req.headers['x-api-key'] as string;
@@ -89,6 +111,7 @@ async function main() {
       app.listen(port, () => {
         logger.info(`Europarcel MCP server listening on port ${port}`);
         logger.info(`MCP endpoint available at http://localhost:${port}/`);
+        logger.info(`Rate limiting: 400 requests per minute per API key`);
       });
     } else {
       throw new Error(`Unknown transport type: ${transportType}`);

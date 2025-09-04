@@ -5,7 +5,6 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
@@ -31,6 +30,7 @@
     "@modelcontextprotocol/sdk": "^1.17.0",
     "axios": "^1.7.7",
     "dotenv": "^16.4.7",
+    "express-rate-limit": "^8.0.1",
     "winston": "^3.17.0",
     "zod": "^3.24.1"
   },
@@ -44,7 +44,6 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   },
-
   "engines": {
     "node": ">=18.0.0"
   },
