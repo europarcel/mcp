@@ -1,10 +1,12 @@
 # Use Node.js 20 LTS
 FROM node:20-alpine
 
-# Set working directory
+# Create app directory
 WORKDIR /app
 
-# Copy package files
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
 COPY package*.json ./
 
 # Install ALL dependencies (including dev deps for build)
@@ -19,14 +21,23 @@ RUN npm run build
 # Remove dev dependencies after build
 RUN npm prune --production
 
-# Expose port (Cloud Run sets PORT automatically)
-EXPOSE 8080
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S europarcel -u 1001
 
-# Set default environment variables for Cloud Run
-ENV MCP_TRANSPORT=http
-ENV MCP_PORT=8080
+# Change ownership of the app directory to the nodejs user
+RUN chown -R europarcel:nodejs /app
+USER europarcel
 
-# No API key needed - customers provide via n8n requests
+# Expose port 3000 (default for self-hosted)
+EXPOSE 3000
+
+# Set production environment
+ENV NODE_ENV=production
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
 
 # Start the server
 CMD ["npm", "start"]

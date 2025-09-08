@@ -6,11 +6,8 @@ import { registerRepaymentTools } from "./tools/repayments/index.js";
 import { registerSearchTools } from "./tools/search/index.js";
 import { registerOrderTools } from "./tools/orders/index.js";
 import { registerHelperTools } from "./tools/helpers/index.js";
-import { logger } from "./utils/logger.js";
 
 export function createServer(): McpServer {
-  logger.info("Creating Europarcel MCP server");
-  
   // Create the MCP server instance
   const server = new McpServer({
     name: "europarcel",
@@ -26,8 +23,6 @@ export function createServer(): McpServer {
   registerSearchTools(server);
   registerOrderTools(server);
   registerHelperTools(server);
-  
-  logger.info("Europarcel MCP server created with all tools registered");
   
   return server;
 } 

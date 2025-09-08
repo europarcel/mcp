@@ -4,8 +4,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "./server.js";
 import { logger } from "./utils/logger.js";
-import dotenv from "dotenv";
 import { AsyncLocalStorage } from "async_hooks";
+import * as dotenv from "dotenv";
 
 // Context storage for API keys
 export const apiKeyStorage = new AsyncLocalStorage<string>();
@@ -22,63 +22,73 @@ declare global {
 // Load environment variables
 dotenv.config();
 
-// No API key validation - customers provide their own keys via n8n
-
 async function main() {
   try {
     // Create the MCP server
     const server = createServer();
     
-    // Determine transport type
+    // Determine transport type - customers can choose stdio or http
     const transportType = process.env.MCP_TRANSPORT || "stdio";
     
     if (transportType === "stdio") {
-      // Use stdio transport (default for CLI usage)
-      logger.info("Starting Europarcel MCP server with stdio transport");
+      // Use stdio transport (for Claude Desktop integration)
       const transport = new StdioServerTransport();
       await server.connect(transport);
-      logger.info("Europarcel MCP server connected via stdio");
     } else if (transportType === "http") {
-      // Use HTTP transport (for web-based clients)
-      const port = parseInt(process.env.PORT || process.env.MCP_PORT || "8080", 10);
-      logger.info(`Starting Europarcel MCP server with HTTP transport on port ${port}`);
+      // Use HTTP transport (for web integrations, n8n, etc.)
+      const port = parseInt(process.env.PORT || process.env.MCP_PORT || "3000", 10);
       
       // Create Express app for HTTP transport
       const express = await import('express');
-      const { rateLimit } = await import('express-rate-limit');
+      const { rateLimit, ipKeyGenerator } = await import('express-rate-limit');
       const app = express.default();
       
       app.use(express.default.json());
       
-      // Rate limiting: 400 requests per API key per minute
-      const apiKeyRateLimit = rateLimit({
+      // Rate limiting: configurable requests per API key per minute and per hour
+      const rateLimitPerMinute = parseInt(process.env.RATE_LIMIT_PER_MINUTE || "50", 10);
+      const rateLimitPerHour = parseInt(process.env.RATE_LIMIT_PER_HOUR || "500", 10);
+      
+      const minuteRateLimit = rateLimit({
         windowMs: 60 * 1000, // 1 minute
-        max: 400, // 400 requests per window per API key
+        max: rateLimitPerMinute,
         keyGenerator: (req) => {
-          // Use API key as the unique identifier for rate limiting
           const apiKey = req.headers['x-api-key'] as string;
-          return apiKey || req.ip || 'unknown'; // Always return a string
+          return `minute:${apiKey || ipKeyGenerator(req.ip || 'unknown')}`;
         },
         message: {
           error: 'Rate limit exceeded',
-          message: 'Maximum 400 requests per minute per API key allowed'
+          message: `Maximum ${rateLimitPerMinute} requests per minute per API key allowed`
         },
-        standardHeaders: true, // Return rate limit info in headers
-        legacyHeaders: false, // Disable legacy X-RateLimit-* headers
-        skip: (req) => {
-          // Skip rate limiting for GET requests (redirects)
-          return req.method === 'GET';
-        }
+        standardHeaders: true,
+        legacyHeaders: false,
+        skip: (req) => req.method === 'GET'
+      });
+
+      const hourRateLimit = rateLimit({
+        windowMs: 60 * 60 * 1000, // 1 hour
+        max: rateLimitPerHour,
+        keyGenerator: (req) => {
+          const apiKey = req.headers['x-api-key'] as string;
+          return `hour:${apiKey || ipKeyGenerator(req.ip || 'unknown')}`;
+        },
+        message: {
+          error: 'Rate limit exceeded',
+          message: `Maximum ${rateLimitPerHour} requests per hour per API key allowed`
+        },
+        standardHeaders: true,
+        legacyHeaders: false,
+        skip: (req) => req.method === 'GET'
       });
       
-      // Redirect GET requests (direct browser access) to europarcel.com
+      // Redirect GET requests (direct browser access) to configurable URL
+      const redirectUrl = process.env.REDIRECT_URL || 'https://europarcel.com';
       app.get('/', (_, res) => {
-        logger.info('Redirecting browser request to europarcel.com');
-        res.redirect(301, 'https://europarcel.com');
+        res.redirect(301, redirectUrl);
       });
       
       // Simple stateless MCP endpoint at root - each request is independent  
-      app.post('/', apiKeyRateLimit, async (req, res) => {
+      app.post('/', minuteRateLimit, hourRateLimit, async (req, res) => {
         try {
           // Extract API key from header
           const apiKey = req.headers['x-api-key'] as string;
@@ -108,23 +118,17 @@ async function main() {
       });
       
       // Start Express server
-      app.listen(port, () => {
-        logger.info(`Europarcel MCP server listening on port ${port}`);
-        logger.info(`MCP endpoint available at http://localhost:${port}/`);
-        logger.info(`Rate limiting: 400 requests per minute per API key`);
-      });
+      app.listen(port);
     } else {
       throw new Error(`Unknown transport type: ${transportType}`);
     }
     
     // Handle graceful shutdown
     process.on("SIGINT", async () => {
-      logger.info("Shutting down Europarcel MCP server...");
       process.exit(0);
     });
     
     process.on("SIGTERM", async () => {
-      logger.info("Shutting down Europarcel MCP server...");
       process.exit(0);
     });
     

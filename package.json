@@ -1,7 +1,7 @@
 {
-  "name": "@europarcel/mcp-hosted",
+  "name": "@europarcel/mcp-self-hosted",
   "version": "1.0.0",
-  "description": "MCP server for Europarcel API with HTTP hosting support - Enable AI assistants to interact with shipping and logistics services via stdio or HTTP transport",
+  "description": "Self-hosted MCP server for Europarcel API - Deploy your own instance to enable AI assistants to interact with shipping and logistics services",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -49,10 +49,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/europarcel/mcp-hosted.git"
+    "url": "https://github.com/europarcel/mcp-self-hosted.git"
   },
   "bugs": {
-    "url": "https://github.com/europarcel/mcp-hosted/issues"
+    "url": "https://github.com/europarcel/mcp-self-hosted/issues"
   },
-  "homepage": "https://github.com/europarcel/mcp-hosted#readme"
+  "homepage": "https://github.com/europarcel/mcp-self-hosted#readme"
 }
