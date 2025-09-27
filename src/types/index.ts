@@ -235,6 +235,15 @@ export interface PostalCodeResult {
   street_name: string;
 }
 
+export interface PostalCodeResponse {
+  data: PostalCodeResult[];
+  meta: {
+    count: number;
+    country_code: string;
+    postal_code: string;
+  };
+}
+
 // Order types
 export interface OrderHistoryItem {
   status_id: number;

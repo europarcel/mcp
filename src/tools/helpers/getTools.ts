@@ -98,20 +98,23 @@ export function registerGetToolsTool(server: McpServer): void {
 
 🔹 **searchLocalities**
    • Purpose: Search for localities by name with fuzzy matching
-   • Returns: Matching localities with county info
+   • Returns: Matching localities with county info in data/meta structure
    • Parameters: country_code (required, 2 letters), search (required, min 2 chars), per_page (optional: 15|50|100|200)
+   • API: GET /search/localities?country_code=RO&search=bucuresti&per_page=50
    • Use Case: Find localities when creating addresses
 
 🔹 **searchStreets**
    • Purpose: Search for streets within a specific locality
-   • Returns: Street names, IDs, and postal codes
-   • Parameters: country_code (required), locality_id (required), search (required)
+   • Returns: Street names, IDs, and postal codes (flat array)
+   • Parameters: country_code (required), locality_id (required), search (required, min 2 chars)
+   • API: GET /search/streets?country_code=RO&locality_id=13891&search=vic
    • Use Case: Find exact street names for precise addressing
 
 🔹 **postalCodeReverse**
    • Purpose: Reverse lookup: get locality/streets from postal code
-   • Returns: Localities, counties, and streets for the postal code
+   • Returns: Localities, counties, and streets for the postal code in data/meta structure
    • Parameters: country_code (required), postal_code (required)
+   • API: GET /search/postal-code-reverse?country_code=RO&postal_code=032111
    • Use Case: Validate and expand postal code into full address details
 
 📦 **ORDER MANAGEMENT TOOLS**

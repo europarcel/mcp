@@ -18,6 +18,7 @@ import {
   LocalitySearchResponse,
   StreetSearchResult,
   PostalCodeResult,
+  PostalCodeResponse,
   OrderListResponse,
   Order,
   CancelOrderResponse,
@@ -257,8 +258,9 @@ export class EuroparcelApiClient {
    * Search localities by country and name
    */
   async searchLocalities(countryCode: string, search: string, perPage?: 15 | 50 | 100 | 200): Promise<LocalitySearchResponse> {
-    const response = await this.client.get<LocalitySearchResponse>(`/search/localities/${countryCode}`, {
+    const response = await this.client.get<LocalitySearchResponse>("/search/localities", {
       params: {
+        country_code: countryCode,
         search,
         per_page: perPage
       }
@@ -270,7 +272,13 @@ export class EuroparcelApiClient {
    * Search streets by country, locality and name
    */
   async searchStreets(countryCode: string, localityId: number, search: string): Promise<StreetSearchResult[]> {
-    const response = await this.client.get<StreetSearchResult[]>(`/search/streets/${countryCode}/${localityId}/${search}`);
+    const response = await this.client.get<StreetSearchResult[]>("/search/streets", {
+      params: {
+        country_code: countryCode,
+        locality_id: localityId,
+        search
+      }
+    });
     return response.data;
   }
   
@@ -278,8 +286,13 @@ export class EuroparcelApiClient {
    * Reverse lookup postal code
    */
   async postalCodeReverse(countryCode: string, postalCode: string): Promise<PostalCodeResult[]> {
-    const response = await this.client.get<PostalCodeResult[]>(`/search/postal-code-reverse/${countryCode}/${postalCode}`);
-    return response.data;
+    const response = await this.client.get<PostalCodeResponse>("/search/postal-code-reverse", {
+      params: {
+        country_code: countryCode,
+        postal_code: postalCode
+      }
+    });
+    return response.data.data;
   }
   
   /**
