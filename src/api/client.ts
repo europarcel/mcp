@@ -18,7 +18,6 @@ import {
   LocalitySearchResponse,
   StreetSearchResult,
   PostalCodeResult,
-  PostalCodeResponse,
   OrderListResponse,
   Order,
   CancelOrderResponse,
@@ -286,13 +285,13 @@ export class EuroparcelApiClient {
    * Reverse lookup postal code
    */
   async postalCodeReverse(countryCode: string, postalCode: string): Promise<PostalCodeResult[]> {
-    const response = await this.client.get<PostalCodeResponse>("/search/postal-code-reverse", {
+    const response = await this.client.get<PostalCodeResult[]>("/search/postal-code-reverse", {
       params: {
         country_code: countryCode,
         postal_code: postalCode
       }
     });
-    return response.data.data;
+    return response.data;
   }
   
   /**
