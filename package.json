@@ -50,10 +50,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/europarcel/mcp-self-hosted.git"
+    "url": "https://github.com/europarcel/mcp-docker.git"
   },
   "bugs": {
-    "url": "https://github.com/europarcel/mcp-self-hosted/issues"
+    "url": "https://github.com/europarcel/mcp-docker/issues"
   },
-  "homepage": "https://github.com/europarcel/mcp-self-hosted#readme"
+  "homepage": "https://github.com/europarcel/mcp-docker#readme"
 }
