@@ -84,7 +84,7 @@ export function registerTrackOrdersByIdsTool(server: McpServer): void {
           } else {
             throw new Error("Invalid order_ids format");
           }
-        } catch (e) {
+        } catch {
           return {
             content: [
               {
