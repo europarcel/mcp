@@ -44,7 +44,7 @@ export interface MarketingSettings {
 // Address types
 export interface Address {
   id: number;
-  address_type: 'individual' | 'business';
+  address_type: "individual" | "business";
   country_code: string;
   locality_id: number;
   street_id: number | null;
@@ -163,7 +163,7 @@ export interface Repayment {
   carrier_name: string | null;
   repayment_amount: number;
   repayment_currency: string;
-  status: 'pending' | 'paid' | 'cancelled';
+  status: "pending" | "paid" | "cancelled";
   payout_id: number | null;
   bank_iban: string | null;
   bank_holder: string | null;
@@ -177,7 +177,7 @@ export interface PayoutReport {
   bank_iban: string | null;
   repayment_amount: number;
   repayment_currency: string;
-  status: 'pending' | 'processing' | 'paid' | 'failed' | 'cancelled';
+  status: "pending" | "processing" | "paid" | "failed" | "cancelled";
   paid_at: string | null;
 }
 
@@ -414,4 +414,4 @@ export interface WalletResponse {
   wallet_balance: number;
   is_active: boolean;
   wallet_currency: string;
-} 
+}

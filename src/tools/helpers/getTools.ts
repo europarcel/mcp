@@ -7,13 +7,14 @@ export function registerGetToolsTool(server: McpServer): void {
     "getTools",
     {
       title: "Get Available Tools",
-      description: "Get a comprehensive list and detailed descriptions of all available MCP tools organized by category",
-      inputSchema: {}
+      description:
+        "Get a comprehensive list and detailed descriptions of all available MCP tools organized by category",
+      inputSchema: {},
     },
     async () => {
       try {
         logger.info("Executing getTools helper");
-        
+
         const toolsDocumentation = `
 🛠️  **EUROPARCEL MCP TOOLS DOCUMENTATION**
 ═══════════════════════════════════════════════════════════════════
@@ -243,30 +244,30 @@ export function registerGetToolsTool(server: McpServer): void {
 `;
 
         logger.info("getTools helper executed successfully");
-        
+
         return {
           content: [
             {
               type: "text",
-              text: toolsDocumentation
-            }
-          ]
+              text: toolsDocumentation,
+            },
+          ],
         };
       } catch (error) {
         logger.error("Error in getTools helper", error);
-        
+
         return {
           content: [
             {
               type: "text",
-              text: `Failed to retrieve tools documentation: ${error instanceof Error ? error.message : 'Unknown error'}`
-            }
+              text: `Failed to retrieve tools documentation: ${error instanceof Error ? error.message : "Unknown error"}`,
+            },
           ],
-          isError: true
+          isError: true,
         };
       }
-    }
+    },
   );
-  
+
   logger.info("getTools helper tool registered successfully");
-} 
+}

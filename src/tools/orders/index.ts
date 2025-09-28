@@ -11,7 +11,7 @@ import { logger } from "../../utils/logger.js";
 
 export function registerOrderTools(server: McpServer): void {
   logger.info("Registering order tools...");
-  
+
   // Register all order-related tools
   registerGetOrdersTool(server);
   registerGetOrderByIdTool(server);
@@ -20,10 +20,10 @@ export function registerOrderTools(server: McpServer): void {
   registerGenerateLabelLinkTool(server);
   registerTrackOrdersByIdsTool(server);
   registerCreateOrderTool(server);
-  
+
   // Register pricing tools as well since they're order-related
   registerPricingTools(server);
-  
+
   logger.info("All order tools registered successfully");
 }
 
@@ -35,4 +35,4 @@ export { registerCancelOrderTool } from "./cancelOrder.js";
 export { registerTrackAwbsByCarrierTool } from "./trackAwbsByCarrier.js";
 export { registerGenerateLabelLinkTool } from "./generateLabelLink.js";
 export { registerTrackOrdersByIdsTool } from "./trackOrdersByIds.js";
-export { registerPricingTools } from "./getPricing.js"; 
+export { registerPricingTools } from "./getPricing.js";

@@ -10,7 +10,7 @@ import { logger } from "../../utils/logger.js";
 
 export function registerLocationTools(server: McpServer): void {
   logger.info("Registering location tools...");
-  
+
   // Register all location-related tools
   registerGetCountriesTool(server);
   registerGetCountiesTool(server);
@@ -19,7 +19,7 @@ export function registerLocationTools(server: McpServer): void {
   registerGetServicesTool(server);
   registerGetFixedLocationsTool(server);
   registerGetFixedLocationByIdTool(server);
-  
+
   logger.info("All location tools registered successfully");
 }
 
@@ -30,4 +30,4 @@ export { registerGetLocalitiesTool } from "./getLocalities.js";
 export { registerGetCarriersTool } from "./getCarriers.js";
 export { registerGetServicesTool } from "./getServices.js";
 export { registerGetFixedLocationsTool } from "./getFixedLocations.js";
-export { registerGetFixedLocationByIdTool } from "./getFixedLocationById.js"; 
+export { registerGetFixedLocationByIdTool } from "./getFixedLocationById.js";

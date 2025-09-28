@@ -11,10 +11,11 @@ export function createServer(): McpServer {
   // Create the MCP server instance
   const server = new McpServer({
     name: "europarcel",
-    description: "MCP server for Europarcel API - Shipping and logistics services",
-    version: "1.0.0"
+    description:
+      "MCP server for Europarcel API - Shipping and logistics services",
+    version: "1.0.0",
   });
-  
+
   // Register all tools
   registerAccountTools(server);
   registerAddressTools(server);
@@ -23,6 +24,6 @@ export function createServer(): McpServer {
   registerSearchTools(server);
   registerOrderTools(server);
   registerHelperTools(server);
-  
+
   return server;
-} 
+}
