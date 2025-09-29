@@ -1,50 +1,70 @@
-# Europarcel MCP Server - Self-Hosted
+# Europarcel MCP Server
 
-Self-hosted MCP server for Europarcel API. Supports both stdio (Claude Desktop) and HTTP (web integrations) modes.
+<div align="center">
+  <img src="https://www.eawb.ro/eawb-square.png" alt="Europarcel MCP Server" width="200" height="200">
+  <h3>MCP server for Europarcel API integration</h3>
+  <p>Supports Claude Desktop (stdio) and web integrations (HTTP)</p>
+</div>
 
-## 🚀 Quick Start
+## Install via Docker
 
-### Docker (HTTP Mode)
+### For Claude Desktop (Stdio Mode)
 ```bash
-git clone https://github.com/europarcel/mcp-self-hosted.git
-cd mcp-self-hosted
+docker run -d \
+  -e MCP_TRANSPORT=stdio \
+  -e EUROPARCEL_API_KEY=your-api-key \
+  --name europarcel-mcp \
+  europarcel/mcp:latest
+```
+
+### For Web Integrations (HTTP Mode)  
+```bash
+docker run -d \
+  -p 3000:3000 \
+  -e MCP_TRANSPORT=http \
+  --name europarcel-mcp \
+  europarcel/mcp:latest
+```
+Server runs on `http://localhost:3000`
+
+## Install via Docker Compose
+
+### For HTTP Mode (Web Integrations)
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  europarcel-mcp:
+    image: europarcel/mcp:latest
+    container_name: europarcel-mcp
+    ports:
+      - "3000:3000"
+    environment:
+      - MCP_TRANSPORT=http
+      - MCP_PORT=3000
+    restart: unless-stopped
+```
+
+### For Stdio Mode (Claude Desktop)
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  europarcel-mcp:
+    image: europarcel/mcp:latest
+    container_name: europarcel-mcp
+    environment:
+      - MCP_TRANSPORT=stdio
+      - EUROPARCEL_API_KEY=your-api-key-here
+    restart: unless-stopped
+```
+
+Then run:
+```bash
 docker-compose up -d
 ```
 
-Server runs on `http://localhost:3000`
-
-### Local Development (Stdio Mode)
-```bash
-git clone https://github.com/europarcel/mcp-self-hosted.git
-cd mcp-self-hosted
-npm install
-npm run build
-EUROPARCEL_API_KEY=your-key npm start
-```
-
-### Docker Hub
-```bash
-docker run -d -p 3000:3000 -e MCP_TRANSPORT=http europarcel/mcp-self-hosted:latest
-```
-
-## 🔌 Usage
-
-### HTTP Mode
-All requests need your Europarcel API key in the `X-API-KEY` header:
-
-```bash
-curl -X POST http://localhost:3000/ \
-  -H "Content-Type: application/json" \
-  -H "X-API-KEY: your-europarcel-api-key" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "tools/list",
-    "params": {}
-  }'
-```
-
-## 🛠️ Available Tools
+## Available Tools
 
 **Account**: `getProfile`  
 **Addresses**: `getBillingAddresses`, `getShippingAddresses`, `getDeliveryAddresses`  
@@ -54,46 +74,14 @@ curl -X POST http://localhost:3000/ \
 **Pricing**: `calculatePrices`, `getPricingExample`  
 **Repayments**: `getRepayments`, `getPayoutReports`  
 
-## 🔗 Integration Examples
+## Get API Key
 
-### n8n
-Use HTTP Request node:
-- URL: `http://your-server:3000/`
-- Method: POST
-- Headers: `X-API-KEY: {{ $json.apiKey }}`
-- Body: MCP JSON-RPC request
+Contact: cs@europarcel.com
 
-### Stdio Mode (Claude Desktop)
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+## API Documentation
 
-```json
-{
-  "mcpServers": {
-    "europarcel": {
-      "command": "node",
-      "args": ["/path/to/mcp-self-hosted/dist/index.js"],
-      "env": {
-        "MCP_TRANSPORT": "stdio",
-        "EUROPARCEL_API_KEY": "your-api-key"
-      }
-    }
-  }
-}
-```
+https://api.europarcel.com/api/documentation
 
-## 🏗️ Local Development
-
-```bash
-npm install
-npm run build
-npm start
-```
-
-## 📚 API Documentation
-
-- **Europarcel API**: https://api.europarcel.com/api/documentation
-- **Get API Key**: Contact cs@europarcel.com
-
-## 📄 License
+## License
 
 MIT License
