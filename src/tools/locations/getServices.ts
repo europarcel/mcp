@@ -20,7 +20,7 @@ export function registerGetServicesTool(server: McpServer): void {
           .optional()
           .describe("Optional service ID to filter by"),
         carrier_id: z
-          .union([z.string(), z.number()])
+          .number()
           .optional()
           .describe("Optional carrier ID to filter by"),
         country_code: z
