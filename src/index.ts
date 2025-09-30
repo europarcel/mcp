@@ -43,52 +43,9 @@ async function main() {
 
       // Create Express app for HTTP transport
       const express = await import("express");
-      const { rateLimit, ipKeyGenerator } = await import("express-rate-limit");
       const app = express.default();
 
       app.use(express.default.json());
-
-      // Rate limiting: configurable requests per API key per minute and per hour
-      const rateLimitPerMinute = parseInt(
-        process.env.RATE_LIMIT_PER_MINUTE || "50",
-        10,
-      );
-      const rateLimitPerHour = parseInt(
-        process.env.RATE_LIMIT_PER_HOUR || "500",
-        10,
-      );
-
-      const minuteRateLimit = rateLimit({
-        windowMs: 60 * 1000, // 1 minute
-        max: rateLimitPerMinute,
-        keyGenerator: (req) => {
-          const apiKey = req.headers["x-api-key"] as string;
-          return `minute:${apiKey || ipKeyGenerator(req.ip || "unknown")}`;
-        },
-        message: {
-          error: "Rate limit exceeded",
-          message: `Maximum ${rateLimitPerMinute} requests per minute per API key allowed`,
-        },
-        standardHeaders: true,
-        legacyHeaders: false,
-        skip: (req) => req.method === "GET",
-      });
-
-      const hourRateLimit = rateLimit({
-        windowMs: 60 * 60 * 1000, // 1 hour
-        max: rateLimitPerHour,
-        keyGenerator: (req) => {
-          const apiKey = req.headers["x-api-key"] as string;
-          return `hour:${apiKey || ipKeyGenerator(req.ip || "unknown")}`;
-        },
-        message: {
-          error: "Rate limit exceeded",
-          message: `Maximum ${rateLimitPerHour} requests per hour per API key allowed`,
-        },
-        standardHeaders: true,
-        legacyHeaders: false,
-        skip: (req) => req.method === "GET",
-      });
 
       // Redirect GET requests (direct browser access) to configurable URL
       const redirectUrl = process.env.REDIRECT_URL || "https://europarcel.com";
@@ -97,7 +54,7 @@ async function main() {
       });
 
       // Simple stateless MCP endpoint at root - each request is independent
-      app.post("/", minuteRateLimit, hourRateLimit, async (req, res) => {
+      app.post("/", async (req, res) => {
         try {
           // Extract API key from header
           const apiKey = req.headers["x-api-key"] as string;
