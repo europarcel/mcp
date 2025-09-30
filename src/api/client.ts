@@ -169,9 +169,9 @@ export class EuroparcelApiClient {
    * Get counties by country code
    */
   async getCounties(countryCode: string): Promise<County[]> {
-    const response = await this.client.get<County[]>("/locations/counties", {
-      params: { country_code: countryCode },
-    });
+    const response = await this.client.get<County[]>(
+      `/locations/counties/${countryCode}`,
+    );
     return response.data;
   }
 

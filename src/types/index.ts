@@ -110,6 +110,7 @@ export interface County {
   id: number;
   county_code: string;
   county_name: string;
+  country_code: string;
 }
 
 export interface Locality {
