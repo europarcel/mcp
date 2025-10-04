@@ -290,11 +290,9 @@ export class EuroparcelApiClient {
     perPage?: 15 | 50 | 100 | 200,
   ): Promise<LocalitySearchResponse> {
     const response = await this.client.get<LocalitySearchResponse>(
-      "/search/localities",
+      `/search/localities/${countryCode}/${search}`,
       {
         params: {
-          country_code: countryCode,
-          search,
           per_page: perPage,
         },
       },
@@ -311,14 +309,7 @@ export class EuroparcelApiClient {
     search: string,
   ): Promise<StreetSearchResult[]> {
     const response = await this.client.get<StreetSearchResult[]>(
-      "/search/streets",
-      {
-        params: {
-          country_code: countryCode,
-          locality_id: localityId,
-          search,
-        },
-      },
+      `/search/streets/${countryCode}/${localityId}/${search}`,
     );
     return response.data;
   }
@@ -331,13 +322,7 @@ export class EuroparcelApiClient {
     postalCode: string,
   ): Promise<PostalCodeResult[]> {
     const response = await this.client.get<PostalCodeResult[]>(
-      "/search/postal-code-reverse",
-      {
-        params: {
-          country_code: countryCode,
-          postal_code: postalCode,
-        },
-      },
+      `/search/postal-code-reverse/${countryCode}/${postalCode}`,
     );
     return response.data;
   }
