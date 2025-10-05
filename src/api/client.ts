@@ -229,12 +229,9 @@ export class EuroparcelApiClient {
     },
   ): Promise<FixedLocation[]> {
     const response = await this.client.get<FixedLocation[]>(
-      "/locations/fixedlocations",
+      `/locations/fixedlocations/${countryCode}`,
       {
-        params: {
-          country_code: countryCode,
-          ...params,
-        },
+        params,
       },
     );
     return response.data;
