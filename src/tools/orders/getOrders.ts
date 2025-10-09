@@ -53,12 +53,7 @@ export function registerGetOrdersTool(server: McpServer): void {
           .optional()
           .describe("Page number for pagination (default: 1)"),
         per_page: z
-          .union([
-            z.literal(15),
-            z.literal(50),
-            z.literal(100),
-            z.literal(200),
-          ])
+          .union([z.literal(15), z.literal(50), z.literal(100), z.literal(200)])
           .optional()
           .describe(
             "Number of orders per page - must be 15, 50, 100, or 200 (default: 15)",

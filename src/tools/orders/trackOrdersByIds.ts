@@ -18,7 +18,9 @@ export function registerTrackOrdersByIdsTool(server: McpServer): void {
         order_ids: z
           .array(z.number().int().min(1))
           .min(1)
-          .describe("Array of order IDs to track (positive integers, minimum 1)"),
+          .describe(
+            "Array of order IDs to track (positive integers, minimum 1)",
+          ),
         language: z
           .enum(["ro", "de", "en", "fr", "hu", "bg"])
           .optional()

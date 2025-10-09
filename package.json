@@ -1,6 +1,6 @@
 {
   "name": "@europarcel/mcp",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Self-hosted MCP server for Europarcel API - Deploy your own instance to enable AI assistants to interact with shipping and logistics services",
   "type": "module",
   "main": "dist/index.js",

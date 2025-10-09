@@ -16,11 +16,11 @@ export function registerCreateOrderTool(server: McpServer): void {
         z.literal(3),
         z.literal(4),
         z.literal(6),
-            z.literal(16),
-          ])
-          .describe(
-            "Carrier ID: 1=Cargus, 2=DPD, 3=FAN Courier, 4=GLS, 6=Sameday, 16=Bookurier",
-          ),
+        z.literal(16),
+      ])
+      .describe(
+        "Carrier ID: 1=Cargus, 2=DPD, 3=FAN Courier, 4=GLS, 6=Sameday, 16=Bookurier",
+      ),
     service_id: z
       .union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])
       .describe(
@@ -62,10 +62,12 @@ export function registerCreateOrderTool(server: McpServer): void {
           .optional()
           .describe("Contact name (required if address_id not provided)"),
         company: z.string().min(5).max(64).optional().describe("Company name"),
-      country_code: z
-        .enum(["RO"])
-        .optional()
-        .describe("Country code - must be 'RO' (required if address_id not provided)"),
+        country_code: z
+          .enum(["RO"])
+          .optional()
+          .describe(
+            "Country code - must be 'RO' (required if address_id not provided)",
+          ),
         county_name: z
           .string()
           .max(100)
@@ -142,10 +144,12 @@ export function registerCreateOrderTool(server: McpServer): void {
           .optional()
           .describe("Contact name (required if address_id not provided)"),
         company: z.string().min(5).max(64).optional().describe("Company name"),
-      country_code: z
-        .enum(["RO"])
-        .optional()
-        .describe("Country code - must be 'RO' (required if address_id not provided)"),
+        country_code: z
+          .enum(["RO"])
+          .optional()
+          .describe(
+            "Country code - must be 'RO' (required if address_id not provided)",
+          ),
         county_name: z
           .string()
           .max(100)
@@ -218,10 +222,26 @@ export function registerCreateOrderTool(server: McpServer): void {
           .array(
             z.object({
               size: z.object({
-                weight: z.number().min(0).max(31).describe("Parcel weight (0-31 kg)"),
-                width: z.number().min(0).max(100).describe("Parcel width (0-100 cm)"),
-                height: z.number().min(0).max(100).describe("Parcel height (0-100 cm)"),
-                length: z.number().min(0).max(100).describe("Parcel length (0-100 cm)"),
+                weight: z
+                  .number()
+                  .min(0)
+                  .max(31)
+                  .describe("Parcel weight (0-31 kg)"),
+                width: z
+                  .number()
+                  .min(0)
+                  .max(100)
+                  .describe("Parcel width (0-100 cm)"),
+                height: z
+                  .number()
+                  .min(0)
+                  .max(100)
+                  .describe("Parcel height (0-100 cm)"),
+                length: z
+                  .number()
+                  .min(0)
+                  .max(100)
+                  .describe("Parcel length (0-100 cm)"),
               }),
               sequence_no: z
                 .number()
@@ -303,7 +323,9 @@ export function registerCreateOrderTool(server: McpServer): void {
           .min(15)
           .max(34)
           .optional()
-          .describe("Bank IBAN (15-34 characters, validated if bank_repayment_amount > 0)"),
+          .describe(
+            "Bank IBAN (15-34 characters, validated if bank_repayment_amount > 0)",
+          ),
       })
       .describe("Extra services and package details"),
   };

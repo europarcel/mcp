@@ -18,11 +18,11 @@ export function registerPricingTools(server: McpServer): void {
         z.literal(3),
         z.literal(4),
         z.literal(6),
-            z.literal(16),
-          ])
-          .describe(
-            "Carrier ID: 0=All carriers, 1=Cargus, 2=DPD, 3=FAN Courier, 4=GLS, 6=Sameday, 16=Bookurier",
-          ),
+        z.literal(16),
+      ])
+      .describe(
+        "Carrier ID: 0=All carriers, 1=Cargus, 2=DPD, 3=FAN Courier, 4=GLS, 6=Sameday, 16=Bookurier",
+      ),
     service_id: z
       .union([
         z.literal(0),
@@ -48,18 +48,8 @@ export function registerPricingTools(server: McpServer): void {
         .min(1)
         .optional()
         .describe("Existing shipping/delivery address ID"),
-      email: z
-        .string()
-        .email()
-        .max(100)
-        .optional()
-        .describe("Sender email"),
-      phone: z
-        .string()
-        .min(7)
-        .max(64)
-        .optional()
-        .describe("Sender phone"),
+      email: z.string().email().max(100).optional().describe("Sender email"),
+      phone: z.string().min(7).max(64).optional().describe("Sender phone"),
       contact: z
         .string()
         .min(5)
@@ -77,17 +67,8 @@ export function registerPricingTools(server: McpServer): void {
         .optional()
         .describe("Country code - must be 'RO' (Romania)"),
       locality_id: z.number().min(1).optional().describe("Locality ID"),
-      postal_code: z
-        .string()
-        .min(4)
-        .max(50)
-        .optional()
-        .describe("Postal code"),
-      locality_name: z
-        .string()
-        .max(100)
-        .optional()
-        .describe("Locality name"),
+      postal_code: z.string().min(4).max(50).optional().describe("Postal code"),
+      locality_name: z.string().max(100).optional().describe("Locality name"),
       county_name: z
         .string()
         .max(100)
@@ -99,11 +80,7 @@ export function registerPricingTools(server: McpServer): void {
         .max(100)
         .optional()
         .describe("Street name"),
-      street_number: z
-        .string()
-        .max(25)
-        .optional()
-        .describe("Street number"),
+      street_number: z.string().max(25).optional().describe("Street number"),
       street_details: z
         .string()
         .max(50)
@@ -121,18 +98,8 @@ export function registerPricingTools(server: McpServer): void {
         .min(1)
         .optional()
         .describe("Existing shipping/delivery address ID"),
-      email: z
-        .string()
-        .email()
-        .max(100)
-        .optional()
-        .describe("Recipient email"),
-      phone: z
-        .string()
-        .min(7)
-        .max(64)
-        .optional()
-        .describe("Recipient phone"),
+      email: z.string().email().max(100).optional().describe("Recipient email"),
+      phone: z.string().min(7).max(64).optional().describe("Recipient phone"),
       contact: z
         .string()
         .min(5)
@@ -150,17 +117,8 @@ export function registerPricingTools(server: McpServer): void {
         .optional()
         .describe("Country code - must be 'RO' (Romania)"),
       locality_id: z.number().min(1).optional().describe("Locality ID"),
-      postal_code: z
-        .string()
-        .min(4)
-        .max(50)
-        .optional()
-        .describe("Postal code"),
-      locality_name: z
-        .string()
-        .max(100)
-        .optional()
-        .describe("Locality name"),
+      postal_code: z.string().min(4).max(50).optional().describe("Postal code"),
+      locality_name: z.string().max(100).optional().describe("Locality name"),
       county_name: z
         .string()
         .max(100)
@@ -172,11 +130,7 @@ export function registerPricingTools(server: McpServer): void {
         .max(100)
         .optional()
         .describe("Street name"),
-      street_number: z
-        .string()
-        .max(25)
-        .optional()
-        .describe("Street number"),
+      street_number: z.string().max(25).optional().describe("Street number"),
       street_details: z
         .string()
         .max(50)
@@ -211,10 +165,26 @@ export function registerPricingTools(server: McpServer): void {
         .array(
           z.object({
             size: z.object({
-              weight: z.number().min(0).max(31).describe("Parcel weight (0-31 kg)"),
-              width: z.number().min(0).max(100).describe("Parcel width (0-100 cm)"),
-              height: z.number().min(0).max(100).describe("Parcel height (0-100 cm)"),
-              length: z.number().min(0).max(100).describe("Parcel length (0-100 cm)"),
+              weight: z
+                .number()
+                .min(0)
+                .max(31)
+                .describe("Parcel weight (0-31 kg)"),
+              width: z
+                .number()
+                .min(0)
+                .max(100)
+                .describe("Parcel width (0-100 cm)"),
+              height: z
+                .number()
+                .min(0)
+                .max(100)
+                .describe("Parcel height (0-100 cm)"),
+              length: z
+                .number()
+                .min(0)
+                .max(100)
+                .describe("Parcel length (0-100 cm)"),
             }),
             sequence_no: z
               .number()
@@ -286,7 +256,9 @@ export function registerPricingTools(server: McpServer): void {
         .min(15)
         .max(34)
         .optional()
-        .describe("Bank IBAN (15-34 characters, validated if bank_repayment_amount > 0)"),
+        .describe(
+          "Bank IBAN (15-34 characters, validated if bank_repayment_amount > 0)",
+        ),
     }),
   };
 

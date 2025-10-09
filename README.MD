@@ -70,8 +70,8 @@ docker-compose up -d
 **Addresses**: `getBillingAddresses`, `getShippingAddresses`, `getDeliveryAddresses`  
 **Locations**: `getCountries`, `getCounties`, `getLocalities`, `getCarriers`, `getServices`, `getFixedLocations`, `getFixedLocationById`  
 **Search**: `searchLocalities`, `searchStreets`, `postalCodeReverse`  
-**Orders**: `getOrders`, `getOrderById`, `createOrder`, `cancelOrder`, `trackAwbsByCarrier`, `getOrderLabels`, `trackOrdersByIds`  
-**Pricing**: `calculatePrices`, `getPricingExample`  
+**Orders**: `getOrders`, `getOrderById`, `createOrder`, `cancelOrder`, `trackAwbsByCarrier`, `generateLabelLink`, `trackOrdersByIds`  
+**Pricing**: `calculatePrices`  
 **Repayments**: `getRepayments`, `getPayoutReports`  
 
 ## Get API Key
