@@ -5,7 +5,6 @@ import { registerLocationTools } from "./tools/locations/index.js";
 import { registerRepaymentTools } from "./tools/repayments/index.js";
 import { registerSearchTools } from "./tools/search/index.js";
 import { registerOrderTools } from "./tools/orders/index.js";
-import { registerHelperTools } from "./tools/helpers/index.js";
 
 export function createServer(): McpServer {
   // Create the MCP server instance
@@ -23,7 +22,6 @@ export function createServer(): McpServer {
   registerRepaymentTools(server);
   registerSearchTools(server);
   registerOrderTools(server);
-  registerHelperTools(server);
 
   return server;
 }
