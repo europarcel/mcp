@@ -16,16 +16,28 @@ export function registerTrackAwbsByCarrierTool(server: McpServer): void {
         "Track multiple AWB numbers from a specific carrier. Parameters: carrier_id (required - accepts numbers like 3 and strings like '3'), awb_list (array, max 200, required), language (optional, default 'ro')",
       inputSchema: {
         carrier_id: z
-          .union([z.string(), z.number()])
-          .describe("The carrier ID to track AWBs from"),
+          .union([
+            z.literal(1),
+            z.literal(2),
+            z.literal(3),
+            z.literal(4),
+            z.literal(6),
+            z.literal(16),
+          ])
+          .describe(
+            "Carrier ID: 1=Cargus, 2=DPD, 3=FAN Courier, 4=GLS, 6=Sameday, 16=Bookurier",
+          ),
         awb_list: z
           .array(z.string())
+          .min(1)
           .max(200)
-          .describe("Array of AWB numbers to track (maximum 200)"),
+          .describe("Array of AWB numbers to track (1-200)"),
         language: z
-          .string()
+          .enum(["ro", "de", "en", "fr", "hu", "bg"])
           .optional()
-          .describe("Language for tracking responses (default: 'ro')"),
+          .describe(
+            "Language for tracking responses: ro (default), de, en, fr, hu, bg",
+          ),
       },
     },
     async (args: any) => {
@@ -47,54 +59,7 @@ export function registerTrackAwbsByCarrierTool(server: McpServer): void {
       const client = new EuroparcelApiClient(apiKey);
 
       try {
-        if (!args.carrier_id) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: "Error: carrier_id parameter is required",
-              },
-            ],
-          };
-        }
-
-        const carrierId = Number(args.carrier_id);
-        if (!Number.isInteger(carrierId) || carrierId <= 0) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: "Error: carrier_id must be a positive integer",
-              },
-            ],
-          };
-        }
-
-        if (
-          !args.awb_list ||
-          !Array.isArray(args.awb_list) ||
-          args.awb_list.length === 0
-        ) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: "Error: awb_list parameter is required and must be a non-empty array",
-              },
-            ],
-          };
-        }
-
-        if (args.awb_list.length > 200) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: "Error: awb_list cannot contain more than 200 items",
-              },
-            ],
-          };
-        }
+        const carrierId = args.carrier_id;
         const language = args.language || "ro";
 
         logger.info("Tracking AWBs by carrier", {

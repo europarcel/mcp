@@ -16,10 +16,8 @@ export function registerGetCountiesTool(server: McpServer): void {
         "Retrieves counties for a specific country. Requires country_code parameter.",
       inputSchema: {
         country_code: z
-          .string()
-          .describe(
-            "The country code (e.g., 'RO' for Romania, 'BG' for Bulgaria)",
-          ),
+          .enum(["RO"])
+          .describe("The country code - must be 'RO' (Romania)"),
       },
     },
     async (args: any) => {

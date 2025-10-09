@@ -16,19 +16,28 @@ export function registerGetServicesTool(server: McpServer): void {
         "Retrieves available services with carrier information. Optional filters: service_id, carrier_id, country_code",
       inputSchema: {
         service_id: z
-          .union([z.string(), z.number()])
-          .optional()
-          .describe("Optional service ID to filter by"),
-        carrier_id: z
-          .number()
-          .optional()
-          .describe("Optional carrier ID to filter by"),
-        country_code: z
-          .string()
+          .union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])
           .optional()
           .describe(
-            "Optional country code to filter by (e.g., 'RO' for Romania)",
+            "Optional service ID: 1=From home to home, 2=From home to locker, 3=From locker to home, 4=From locker to locker",
           ),
+        carrier_id: z
+          .union([
+            z.literal(1),
+            z.literal(2),
+            z.literal(3),
+            z.literal(4),
+            z.literal(6),
+            z.literal(16),
+          ])
+          .optional()
+          .describe(
+            "Optional carrier ID: 1=Cargus, 2=DPD, 3=FAN Courier, 4=GLS, 6=Sameday, 16=Bookurier",
+          ),
+        country_code: z
+          .enum(["RO"])
+          .optional()
+          .describe("Optional country code - must be 'RO' (Romania)"),
       },
     },
     async (args: any) => {

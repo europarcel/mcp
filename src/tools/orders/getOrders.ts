@@ -53,12 +53,16 @@ export function registerGetOrdersTool(server: McpServer): void {
           .optional()
           .describe("Page number for pagination (default: 1)"),
         per_page: z
-          .number()
-          .int()
-          .min(15)
-          .max(200)
+          .union([
+            z.literal(15),
+            z.literal(50),
+            z.literal(100),
+            z.literal(200),
+          ])
           .optional()
-          .describe("Number of orders per page (15-200, default: 15)"),
+          .describe(
+            "Number of orders per page - must be 15, 50, 100, or 200 (default: 15)",
+          ),
       },
     },
     async (args: any) => {
@@ -82,17 +86,6 @@ export function registerGetOrdersTool(server: McpServer): void {
       try {
         const page = args.page || 1;
         const perPage = args.per_page || 15;
-
-        if (perPage < 15 || perPage > 200) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: "Error: per_page must be between 15 and 200",
-              },
-            ],
-          };
-        }
 
         logger.info("Fetching orders", { page, per_page: perPage });
 

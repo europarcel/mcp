@@ -16,14 +16,16 @@ export function registerSearchStreetsTool(server: McpServer): void {
         "Search for streets in a specific locality. Parameters: country_code (required), locality_id (required), search (required)",
       inputSchema: {
         country_code: z
-          .string()
-          .describe("The country code (e.g., 'RO' for Romania)"),
+          .enum(["RO"])
+          .describe("The country code - must be 'RO' (Romania)"),
         locality_id: z
-          .union([z.string(), z.number()])
+          .number()
+          .min(1)
           .describe("The locality ID to search within"),
         search: z
           .string()
-          .describe("The search term for street names (minimum 1 character)"),
+          .min(2)
+          .describe("The search term for street names (minimum 2 characters)"),
       },
     },
     async (args: any) => {

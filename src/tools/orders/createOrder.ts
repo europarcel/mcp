@@ -10,16 +10,21 @@ export function registerCreateOrderTool(server: McpServer): void {
   // Define Zod schema for order creation - similar to pricing but with stricter requirements
   const CreateOrderSchema = {
     carrier_id: z
-      .number()
-      .min(1)
-      .describe(
-        "Carrier ID (must be greater than 0, no 'all carriers' option)",
-      ),
+      .union([
+        z.literal(1),
+        z.literal(2),
+        z.literal(3),
+        z.literal(4),
+        z.literal(6),
+            z.literal(16),
+          ])
+          .describe(
+            "Carrier ID: 1=Cargus, 2=DPD, 3=FAN Courier, 4=GLS, 6=Sameday, 16=Bookurier",
+          ),
     service_id: z
-      .number()
-      .min(1)
+      .union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])
       .describe(
-        "Service ID (must be greater than 0, no 'all services' option)",
+        "Service ID: 1=From home to home, 2=From home to locker, 3=From locker to home, 4=From locker to locker",
       ),
     billing_to: z
       .object({
@@ -57,13 +62,10 @@ export function registerCreateOrderTool(server: McpServer): void {
           .optional()
           .describe("Contact name (required if address_id not provided)"),
         company: z.string().min(5).max(64).optional().describe("Company name"),
-        country_code: z
-          .string()
-          .length(2)
-          .optional()
-          .describe(
-            "Country code e.g. 'RO' (required if address_id not provided)",
-          ),
+      country_code: z
+        .enum(["RO"])
+        .optional()
+        .describe("Country code - must be 'RO' (required if address_id not provided)"),
         county_name: z
           .string()
           .max(100)
@@ -140,13 +142,10 @@ export function registerCreateOrderTool(server: McpServer): void {
           .optional()
           .describe("Contact name (required if address_id not provided)"),
         company: z.string().min(5).max(64).optional().describe("Company name"),
-        country_code: z
-          .string()
-          .length(2)
-          .optional()
-          .describe(
-            "Country code e.g. 'RO' (required if address_id not provided)",
-          ),
+      country_code: z
+        .enum(["RO"])
+        .optional()
+        .describe("Country code - must be 'RO' (required if address_id not provided)"),
         county_name: z
           .string()
           .max(100)
@@ -198,22 +197,16 @@ export function registerCreateOrderTool(server: McpServer): void {
     content: z
       .object({
         envelopes_count: z
-          .number()
-          .min(0)
+          .union([z.literal(0), z.literal(1)])
           .describe(
-            "Number of envelopes (exactly one of envelopes/pallets/parcels must be > 0)",
-          ),
-        pallets_count: z
-          .number()
-          .min(0)
-          .describe(
-            "Number of pallets (exactly one of envelopes/pallets/parcels must be > 0)",
+            "Number of envelopes (0 or 1 only). Exactly one of envelopes/parcels must be > 0",
           ),
         parcels_count: z
           .number()
           .min(0)
+          .max(10)
           .describe(
-            "Number of parcels (exactly one of envelopes/pallets/parcels must be > 0)",
+            "Number of parcels (0-10, exactly one of envelopes/parcels must be > 0)",
           ),
         total_weight: z
           .number()
@@ -225,10 +218,10 @@ export function registerCreateOrderTool(server: McpServer): void {
           .array(
             z.object({
               size: z.object({
-                weight: z.number().min(0).describe("Parcel weight"),
-                width: z.number().min(0).describe("Parcel width"),
-                height: z.number().min(0).describe("Parcel height"),
-                length: z.number().min(0).describe("Parcel length"),
+                weight: z.number().min(0).max(31).describe("Parcel weight (0-31 kg)"),
+                width: z.number().min(0).max(100).describe("Parcel width (0-100 cm)"),
+                height: z.number().min(0).max(100).describe("Parcel height (0-100 cm)"),
+                length: z.number().min(0).max(100).describe("Parcel length (0-100 cm)"),
               }),
               sequence_no: z
                 .number()
@@ -246,8 +239,9 @@ export function registerCreateOrderTool(server: McpServer): void {
       .object({
         parcel_content: z
           .string()
+          .min(4)
           .max(100)
-          .describe("Package content description (required)"),
+          .describe("Package content description (required, 4-100 characters)"),
         sms_sender: z
           .boolean()
           .optional()
@@ -273,33 +267,43 @@ export function registerCreateOrderTool(server: McpServer): void {
         insurance_amount: z
           .number()
           .min(0)
+          .max(10000)
           .optional()
-          .describe("Insurance amount"),
+          .describe("Insurance amount (0-10000)"),
         insurance_amount_currency: z
           .string()
           .length(3)
+          .regex(/^[A-Z]{3}$/)
           .optional()
-          .describe("Insurance currency (required if insurance_amount > 0)"),
+          .describe(
+            "Insurance currency - 3 uppercase letters (e.g., 'RON', required if insurance_amount > 0)",
+          ),
         bank_repayment_amount: z
           .number()
           .min(0)
+          .max(7000)
           .optional()
-          .describe("COD amount"),
+          .describe("COD amount (0-7000)"),
         bank_repayment_currency: z
           .string()
           .length(3)
+          .regex(/^[A-Z]{3}$/)
           .optional()
-          .describe("COD currency (required if bank_repayment_amount > 0)"),
+          .describe(
+            "COD currency - 3 uppercase letters (e.g., 'RON', required if bank_repayment_amount > 0)",
+          ),
         bank_holder: z
           .string()
-          .max(200)
+          .min(5)
+          .max(70)
           .optional()
-          .describe("Bank account holder name"),
+          .describe("Bank account holder name (5-70 characters)"),
         bank_iban: z
           .string()
+          .min(15)
           .max(34)
           .optional()
-          .describe("Bank IBAN for COD transfers"),
+          .describe("Bank IBAN (15-34 characters, validated if bank_repayment_amount > 0)"),
       })
       .describe("Extra services and package details"),
   };
@@ -354,13 +358,12 @@ export function registerCreateOrderTool(server: McpServer): void {
         // Validate content requirements
         const contentCounts = [
           args.content?.envelopes_count || 0,
-          args.content?.pallets_count || 0,
           args.content?.parcels_count || 0,
         ];
         const nonZeroCounts = contentCounts.filter((count) => count > 0);
         if (nonZeroCounts.length !== 1) {
           throw new Error(
-            "Exactly one of envelopes_count, pallets_count, or parcels_count must be greater than 0",
+            "Exactly one of envelopes_count or parcels_count must be greater than 0",
           );
         }
 

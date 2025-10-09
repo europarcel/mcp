@@ -3,6 +3,7 @@ import { EuroparcelApiClient } from "../../api/client.js";
 import { logger } from "../../utils/logger.js";
 import { apiKeyStorage } from "../../index.js";
 import { Repayment } from "../../types/index.js";
+import { z } from "zod";
 
 // Helper function to format repayment status
 function formatStatus(status: string): string {
@@ -31,7 +32,21 @@ export function registerGetRepaymentsTool(server: McpServer): void {
       title: "Get Repayments",
       description:
         "Retrieves customer repayments with AWB details, amounts, and delivery status. Parameters: page (number), order_id (number - optional filter)",
-      inputSchema: {},
+      inputSchema: {
+        page: z
+          .number()
+          .int()
+          .min(1)
+          .max(1000)
+          .optional()
+          .describe("Page number for pagination (1-1000, default: 1)"),
+        order_id: z
+          .number()
+          .int()
+          .min(1)
+          .optional()
+          .describe("Filter repayments by specific order ID (optional)"),
+      },
     },
     async (args: any) => {
       // Get API key from async context

@@ -11,14 +11,33 @@ export function registerPricingTools(server: McpServer): void {
   // Define Zod schema for price calculation
   const PriceRequestSchema = {
     carrier_id: z
-      .number()
-      .describe("Carrier ID (0 for all carriers, or specific carrier ID)"),
+      .union([
+        z.literal(0),
+        z.literal(1),
+        z.literal(2),
+        z.literal(3),
+        z.literal(4),
+        z.literal(6),
+            z.literal(16),
+          ])
+          .describe(
+            "Carrier ID: 0=All carriers, 1=Cargus, 2=DPD, 3=FAN Courier, 4=GLS, 6=Sameday, 16=Bookurier",
+          ),
     service_id: z
-      .number()
-      .describe("Service ID (0 for all services, or specific service ID)"),
+      .union([
+        z.literal(0),
+        z.literal(1),
+        z.literal(2),
+        z.literal(3),
+        z.literal(4),
+      ])
+      .describe(
+        "Service ID: 0=All services, 1=From home to home, 2=From home to locker, 3=From locker to home, 4=From locker to locker",
+      ),
     billing_to: z.object({
       billing_address_id: z
         .number()
+        .min(1)
         .describe(
           "Billing address ID (must be a billing address owned by customer)",
         ),
@@ -26,79 +45,161 @@ export function registerPricingTools(server: McpServer): void {
     address_from: z.object({
       address_from_id: z
         .number()
+        .min(1)
         .optional()
         .describe("Existing shipping/delivery address ID"),
-      email: z.string().email().optional().describe("Sender email"),
-      phone: z.string().optional().describe("Sender phone"),
-      contact: z.string().optional().describe("Sender contact name"),
-      company: z.string().optional().describe("Sender company name"),
-      country_code: z
+      email: z
         .string()
-        .length(2)
+        .email()
+        .max(100)
         .optional()
-        .describe("Country code (e.g., 'RO')"),
-      locality_id: z.number().optional().describe("Locality ID"),
-      postal_code: z.string().optional().describe("Postal code"),
-      locality_name: z.string().optional().describe("Locality name"),
-      county_name: z.string().optional().describe("County name or code"),
-      street_name: z.string().optional().describe("Street name"),
-      street_number: z.string().optional().describe("Street number"),
+        .describe("Sender email"),
+      phone: z
+        .string()
+        .min(7)
+        .max(64)
+        .optional()
+        .describe("Sender phone"),
+      contact: z
+        .string()
+        .min(5)
+        .max(100)
+        .optional()
+        .describe("Sender contact name"),
+      company: z
+        .string()
+        .min(5)
+        .max(64)
+        .optional()
+        .describe("Sender company name"),
+      country_code: z
+        .enum(["RO"])
+        .optional()
+        .describe("Country code - must be 'RO' (Romania)"),
+      locality_id: z.number().min(1).optional().describe("Locality ID"),
+      postal_code: z
+        .string()
+        .min(4)
+        .max(50)
+        .optional()
+        .describe("Postal code"),
+      locality_name: z
+        .string()
+        .max(100)
+        .optional()
+        .describe("Locality name"),
+      county_name: z
+        .string()
+        .max(100)
+        .optional()
+        .describe("County name or code"),
+      street_name: z
+        .string()
+        .min(5)
+        .max(100)
+        .optional()
+        .describe("Street name"),
+      street_number: z
+        .string()
+        .max(25)
+        .optional()
+        .describe("Street number"),
       street_details: z
         .string()
+        .max(50)
         .optional()
         .describe("Additional address details"),
       fixed_location_id: z
         .number()
+        .min(1)
         .optional()
         .describe("Fixed location ID for services 3 & 4"),
     }),
     address_to: z.object({
       address_to_id: z
         .number()
+        .min(1)
         .optional()
         .describe("Existing shipping/delivery address ID"),
-      email: z.string().email().optional().describe("Recipient email"),
-      phone: z.string().optional().describe("Recipient phone"),
-      contact: z.string().optional().describe("Recipient contact name"),
-      company: z.string().optional().describe("Recipient company name"),
-      country_code: z
+      email: z
         .string()
-        .length(2)
+        .email()
+        .max(100)
         .optional()
-        .describe("Country code (e.g., 'RO')"),
-      locality_id: z.number().optional().describe("Locality ID"),
-      postal_code: z.string().optional().describe("Postal code"),
-      locality_name: z.string().optional().describe("Locality name"),
-      county_name: z.string().optional().describe("County name or code"),
-      street_name: z.string().optional().describe("Street name"),
-      street_number: z.string().optional().describe("Street number"),
+        .describe("Recipient email"),
+      phone: z
+        .string()
+        .min(7)
+        .max(64)
+        .optional()
+        .describe("Recipient phone"),
+      contact: z
+        .string()
+        .min(5)
+        .max(100)
+        .optional()
+        .describe("Recipient contact name"),
+      company: z
+        .string()
+        .min(5)
+        .max(64)
+        .optional()
+        .describe("Recipient company name"),
+      country_code: z
+        .enum(["RO"])
+        .optional()
+        .describe("Country code - must be 'RO' (Romania)"),
+      locality_id: z.number().min(1).optional().describe("Locality ID"),
+      postal_code: z
+        .string()
+        .min(4)
+        .max(50)
+        .optional()
+        .describe("Postal code"),
+      locality_name: z
+        .string()
+        .max(100)
+        .optional()
+        .describe("Locality name"),
+      county_name: z
+        .string()
+        .max(100)
+        .optional()
+        .describe("County name or code"),
+      street_name: z
+        .string()
+        .min(5)
+        .max(100)
+        .optional()
+        .describe("Street name"),
+      street_number: z
+        .string()
+        .max(25)
+        .optional()
+        .describe("Street number"),
       street_details: z
         .string()
+        .max(50)
         .optional()
         .describe("Additional address details"),
       fixed_location_id: z
         .number()
+        .min(1)
         .optional()
         .describe("Fixed location ID for services 2 & 4"),
     }),
     content: z.object({
       envelopes_count: z
-        .number()
-        .min(0)
+        .union([z.literal(0), z.literal(1)])
         .describe(
-          "Number of envelopes (exactly one of envelopes/pallets/parcels must be > 0). For envelopes: max 1, no size details needed",
-        ),
-      pallets_count: z
-        .number()
-        .min(0)
-        .describe(
-          "Number of pallets (exactly one of envelopes/pallets/parcels must be > 0)",
+          "Number of envelopes (0 or 1 only). Exactly one of envelopes/parcels must be > 0. For envelopes: no size details needed",
         ),
       parcels_count: z
         .number()
         .min(0)
+        .max(10)
         .describe(
-          "Number of parcels (exactly one of envelopes/pallets/parcels must be > 0)",
+          "Number of parcels (0-10, exactly one of envelopes/parcels must be > 0)",
         ),
       total_weight: z
         .number()
@@ -110,10 +211,10 @@ export function registerPricingTools(server: McpServer): void {
         .array(
           z.object({
             size: z.object({
-              weight: z.number().positive().describe("Parcel weight"),
-              width: z.number().positive().describe("Parcel width in cm"),
-              height: z.number().positive().describe("Parcel height in cm"),
-              length: z.number().positive().describe("Parcel length in cm"),
+              weight: z.number().min(0).max(31).describe("Parcel weight (0-31 kg)"),
+              width: z.number().min(0).max(100).describe("Parcel width (0-100 cm)"),
+              height: z.number().min(0).max(100).describe("Parcel height (0-100 cm)"),
+              length: z.number().min(0).max(100).describe("Parcel length (0-100 cm)"),
             }),
             sequence_no: z
               .number()
@@ -129,7 +230,11 @@ export function registerPricingTools(server: McpServer): void {
         ),
     }),
     extra: z.object({
-      parcel_content: z.string().describe("Content description (required)"),
+      parcel_content: z
+        .string()
+        .min(4)
+        .max(100)
+        .describe("Content description (required, 4-100 characters)"),
       internal_identifier: z
         .string()
         .optional()
@@ -145,26 +250,43 @@ export function registerPricingTools(server: McpServer): void {
       insurance_amount: z
         .number()
         .min(0)
+        .max(10000)
         .optional()
-        .describe("Insurance amount"),
+        .describe("Insurance amount (0-10000)"),
       insurance_amount_currency: z
         .string()
+        .length(3)
+        .regex(/^[A-Z]{3}$/)
         .optional()
-        .describe("Insurance currency (required if insurance_amount > 0)"),
+        .describe(
+          "Insurance currency - 3 uppercase letters (e.g., 'RON', required if insurance_amount > 0)",
+        ),
       bank_repayment_amount: z
         .number()
         .min(0)
+        .max(7000)
         .optional()
-        .describe("COD amount"),
+        .describe("COD amount (0-7000)"),
       bank_repayment_currency: z
         .string()
+        .length(3)
+        .regex(/^[A-Z]{3}$/)
         .optional()
-        .describe("COD currency (required if bank_repayment_amount > 0)"),
-      bank_holder: z.string().optional().describe("Bank account holder name"),
+        .describe(
+          "COD currency - 3 uppercase letters (e.g., 'RON', required if bank_repayment_amount > 0)",
+        ),
+      bank_holder: z
+        .string()
+        .min(5)
+        .max(70)
+        .optional()
+        .describe("Bank account holder name (5-70 characters)"),
       bank_iban: z
         .string()
+        .min(15)
+        .max(34)
         .optional()
-        .describe("Bank IBAN (validated if bank_repayment_amount > 0)"),
+        .describe("Bank IBAN (15-34 characters, validated if bank_repayment_amount > 0)"),
     }),
   };
 
@@ -183,7 +305,7 @@ ADDRESSES:
 - Required fields: country_code, contact, street_name, street_number, phone, email
 
 CONTENT:
-- EXACTLY ONE of envelopes_count, pallets_count, or parcels_count must be > 0
+- EXACTLY ONE of envelopes_count or parcels_count must be > 0
 - ENVELOPES: Max 1 envelope, no parcels array or size details needed
 - PARCELS: If parcels_count > 0, provide parcels array with matching count
 - Parcel sequence_no must be consecutive (1, 2, 3...) and match parcels_count

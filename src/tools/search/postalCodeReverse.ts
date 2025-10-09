@@ -16,10 +16,12 @@ export function registerPostalCodeReverseTool(server: McpServer): void {
         "Get locality, county and street information for a given postal code. Parameters: country_code (required), postal_code (required)",
       inputSchema: {
         country_code: z
-          .string()
-          .describe("The country code (e.g., 'RO' for Romania)"),
+          .enum(["RO"])
+          .describe("The country code - must be 'RO' (Romania)"),
         postal_code: z
           .string()
+          .min(4)
+          .max(50)
           .describe("The postal code to look up (e.g., '010123')"),
       },
     },

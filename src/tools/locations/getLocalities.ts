@@ -16,11 +16,15 @@ export function registerGetLocalitiesTool(server: McpServer): void {
         "Retrieves localities for a specific country and county. Requires country_code and county_code parameters.",
       inputSchema: {
         country_code: z
-          .string()
-          .describe("The country code (e.g., 'RO' for Romania)"),
+          .enum(["RO"])
+          .describe("The country code - must be 'RO' (Romania)"),
         county_code: z
           .string()
-          .describe("The county code (e.g., 'B' for Bucharest)"),
+          .min(1)
+          .max(100)
+          .describe(
+            "County code (1-2 characters, e.g., 'B', 'CJ') or county name (3+ characters, e.g., 'Bucuresti', 'Cluj')",
+          ),
       },
     },
     async (args: any) => {

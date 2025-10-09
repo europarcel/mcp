@@ -16,9 +16,8 @@ export function registerSearchLocalitiesTool(server: McpServer): void {
         "Search for localities by country and name. Supports diacritics, punctuation, and reversed county-city queries. Parameters: country_code (2 letters, required), search (min 2 chars, required), per_page (15|50|100|200)",
       inputSchema: {
         country_code: z
-          .string()
-          .length(2)
-          .describe("The country code (exactly 2 letters, e.g., 'RO', 'HU')"),
+          .enum(["RO"])
+          .describe("The country code - must be 'RO' (Romania)"),
         search: z
           .string()
           .min(2)
@@ -26,10 +25,16 @@ export function registerSearchLocalitiesTool(server: McpServer): void {
             "The search term for locality names (minimum 2 characters)",
           ),
         per_page: z
-          .enum(["15", "50", "100", "200"])
-          .or(z.number().refine((val) => [15, 50, 100, 200].includes(val)))
+          .union([
+            z.literal(15),
+            z.literal(50),
+            z.literal(100),
+            z.literal(200),
+          ])
           .optional()
-          .describe("Number of results per page (15, 50, 100, or 200)"),
+          .describe(
+            "Number of results per page - must be 15, 50, 100, or 200 (default: 15)",
+          ),
       },
     },
     async (args: any) => {

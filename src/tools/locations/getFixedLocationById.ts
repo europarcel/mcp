@@ -15,7 +15,11 @@ export function registerGetFixedLocationByIdTool(server: McpServer): void {
       description:
         "Retrieves detailed information about a specific fixed location. Requires id parameter.",
       inputSchema: {
-        id: z.union([z.string(), z.number()]).describe("The fixed location ID"),
+        id: z
+          .number()
+          .int()
+          .min(1)
+          .describe("The fixed location ID (integer, minimum 1)"),
       },
     },
     async (args: any) => {

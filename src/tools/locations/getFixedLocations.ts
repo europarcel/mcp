@@ -16,29 +16,50 @@ export function registerGetFixedLocationsTool(server: McpServer): void {
         "Retrieves fixed locations (lockers) for a country. Requires country_code. Optional filters: locality_id, carrier_id (single or comma-separated list), locality_name+county_name combination.",
       inputSchema: {
         country_code: z
-          .string()
-          .describe("The country code (e.g., 'RO' for Romania)"),
+          .enum(["RO"])
+          .describe("The country code - must be 'RO' (Romania)"),
         locality_id: z
-          .union([z.string(), z.number()])
+          .number()
+          .min(1)
           .optional()
           .describe("Optional locality ID to filter by"),
         carrier_id: z
-          .union([z.string(), z.number()])
+          .union([
+            z.literal(1),
+            z.literal(2),
+            z.literal(3),
+            z.literal(4),
+            z.literal(6),
+            z.literal(16),
+            z.string().regex(/^(\d+,)*\d+$/),
+          ])
           .optional()
           .describe(
-            "Optional carrier ID to filter by. Can be single ID (e.g., 1) or comma-separated list (e.g., '1,2,3')",
+            "Optional carrier ID: Single ID (1=Cargus, 2=DPD, 3=FAN Courier, 4=GLS, 6=Sameday, 16=Bookurier) or comma-separated list (e.g., '1,2,3')",
           ),
         locality_name: z
           .string()
+          .min(2)
+          .max(100)
           .optional()
           .describe(
             "Optional locality name to filter by (must be used with county_name)",
           ),
         county_name: z
           .string()
+          .min(2)
+          .max(100)
           .optional()
           .describe(
             "Optional county name to filter by (must be used with locality_name)",
+          ),
+        search: z
+          .string()
+          .min(2)
+          .max(100)
+          .optional()
+          .describe(
+            "Optional search term to filter by name or address (minimum 2 characters, partial match, case-insensitive)",
           ),
       },
     },
@@ -95,6 +116,7 @@ export function registerGetFixedLocationsTool(server: McpServer): void {
         if (args.carrier_id) params.carrier_id = args.carrier_id;
         if (args.locality_name) params.locality_name = args.locality_name;
         if (args.county_name) params.county_name = args.county_name;
+        if (args.search) params.search = args.search;
 
         const locations = await client.getFixedLocations(
           args.country_code,
@@ -111,6 +133,7 @@ export function registerGetFixedLocationsTool(server: McpServer): void {
         if (args.locality_name && args.county_name)
           filters.push(`locality: ${args.locality_name}, ${args.county_name}`);
         if (args.carrier_id) filters.push(`carrier_id: ${args.carrier_id}`);
+        if (args.search) filters.push(`search: "${args.search}"`);
 
         if (filters.length > 0) {
           formattedResponse += ` (filtered by ${filters.join(", ")})`;

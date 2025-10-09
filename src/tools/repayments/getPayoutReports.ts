@@ -3,6 +3,7 @@ import { EuroparcelApiClient } from "../../api/client.js";
 import { logger } from "../../utils/logger.js";
 import { apiKeyStorage } from "../../index.js";
 import { PayoutReport } from "../../types/index.js";
+import { z } from "zod";
 
 // Helper function to format repayment status
 function formatStatus(status: string): string {
@@ -31,7 +32,15 @@ export function registerGetPayoutReportsTool(server: McpServer): void {
       title: "Get Payout Reports",
       description:
         "Retrieves payout reports showing consolidated bank transfer information. Parameters: page (number)",
-      inputSchema: {},
+      inputSchema: {
+        page: z
+          .number()
+          .int()
+          .min(1)
+          .max(1000)
+          .optional()
+          .describe("Page number for pagination (1-1000, default: 1)"),
+      },
     },
     async (args: any) => {
       // Get API key from async context
